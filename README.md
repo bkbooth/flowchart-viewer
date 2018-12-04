@@ -1,3 +1,3 @@
 # Flowchart Viewer
 
-A simple HTML flowchart viewer
+A simple HTML/CSS/JS flowchart viewer
