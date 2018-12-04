@@ -1,0 +1,18 @@
+html,
+body {
+}
+
+ul.container,
+ul.node__links {
+  list-style-type: none;
+}
+
+.node__collapsible {
+  max-height: 300px;
+  overflow: hidden;
+  transition: max-height 0.3s;
+}
+
+.node:not(.node--current) .node__collapsible {
+  max-height: 0;
+}
