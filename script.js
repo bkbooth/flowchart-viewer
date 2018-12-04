@@ -1,27 +1,78 @@
 "use strict";
 
+/**
+ * A node in the flowchart
+ *
+ * @typedef {Object} FlowchartNode
+ * @property {string} id
+ * @property {string} text
+ * @property {?FlowchartNodeLink[]} links
+ */
+
+/**
+ * A link to another node in the flowchart
+ *
+ * @typedef {Object} FlowchartNodeLink
+ * @property {string} text
+ * @property {string} nodeId
+ * @property {?string} linkExtraText
+ */
+
 console.log("Loading...");
 Promise.all([fetch("flowchart.json").then(res => res.json()), domReady()]).then(
   ([flowchart]) => {
     console.log("Loaded data", flowchart);
 
+    /**
+     * @type {HTMLElement}
+     */
     let containerElement = document.querySelector("ul.container");
-    let visitedNodes = moveToNewNode(flowchart.entrypoint, []);
-    addNodeToView(visitedNodes);
 
-    function moveToNewNode(nodeId, visitedNodes) {
-      console.log("moveToNewNode", { nodeId, visitedNodes });
+    /**
+     * @type {FlowchartNode[]}
+     */
+    let visitedNodes = [];
+
+    // Global click event listener so we don't have to bind and remove from every link we create
+    document.addEventListener("click", event => {
+      if (event.target.classList.contains("node__link-button")) {
+        event.preventDefault();
+        handleNodeLinkClick(event.target.dataset.nodeId);
+      } else if (event.target.classList.contains("node__back-button")) {
+        event.preventDefault();
+        handleBackLinkClick();
+      }
+    });
+
+    // Start off with the entrypoint node
+    moveToNewNode(flowchart.entrypoint);
+    addNodeToView();
+
+    /**
+     * Update visitedNodes with the node object for the provided nodeId
+     *
+     * @param {string} nodeId
+     */
+    function moveToNewNode(nodeId) {
+      console.log("moveToNewNode", { nodeId });
       let node = flowchart[nodeId];
       node.id = nodeId;
-      return [...visitedNodes, node];
+      visitedNodes = [...visitedNodes, node];
     }
 
-    function moveToPreviousNode(visitedNodes) {
-      return visitedNodes.slice(-1);
+    /**
+     * Remove the last (most recent) node from visitedNodes
+     */
+    function moveToPreviousNode() {
+      console.log("moveToPreviousNode");
+      visitedNodes = visitedNodes.slice(0, -1);
     }
 
-    function addNodeToView(visitedNodes) {
-      console.log("addNodeToView", visitedNodes);
+    /**
+     * Build and add a new node element into the view
+     */
+    function addNodeToView() {
+      console.log("addNodeToView", { visitedNodes });
       collapsePreviousNode();
 
       let currentNodeIndex = visitedNodes.length - 1;
@@ -31,72 +82,63 @@ Promise.all([fetch("flowchart.json").then(res => res.json()), domReady()]).then(
       currentNodeElement.dataset.id = currentNode.id;
       currentNodeElement.dataset.index = currentNodeIndex;
 
-      let textElement = document.createElement("p");
-      textElement.innerText = currentNode.text;
-      textElement.className = "node__text";
-      currentNodeElement.appendChild(textElement);
-
-      let collapsibleWrapperElement = document.createElement("div");
-      collapsibleWrapperElement.className = "node__collapsible";
-
       let hasPreviousNode = visitedNodes.length > 1;
+      let linkToCurrentNode;
       if (hasPreviousNode) {
         let previousNode = visitedNodes[currentNodeIndex - 1];
-        let linkToCurrentNode = previousNode.links.find(
+        linkToCurrentNode = previousNode.links.find(
           link => link.nodeId === currentNode.id
         );
-        if (linkToCurrentNode && linkToCurrentNode.linkExtraText) {
-          let textElement = document.createElement("p");
-          textElement.innerText = linkToCurrentNode.linkExtraText;
-          textElement.className = "node__extra-text";
-          collapsibleWrapperElement.appendChild(textElement);
-        }
       }
 
-      if (currentNode.links && currentNode.links.length) {
-        let listElement = document.createElement("ul");
-        listElement.className = "node__links";
+      currentNodeElement.innerHTML = `
+        <div class="node__text">${currentNode.text}</div>
+        <div class="node__collapsible">
+          ${
+            linkToCurrentNode && linkToCurrentNode.linkExtraText
+              ? `<div class="node__extra-text">${
+                  linkToCurrentNode.linkExtraText
+                }</div>`
+              : ""
+          }
 
-        currentNode.links.forEach(link => {
-          let listItemElement = document.createElement("li");
-          listItemElement.className = "node__link";
+          ${
+            currentNode.links && currentNode.links.length
+              ? `<ul class="node__links">
+                  ${currentNode.links
+                    .map(
+                      link => `
+                      <li class="node__link">
+                        <a
+                          href="#"
+                          class="node__link-button"
+                          data-node-id="${link.nodeId}"
+                        >${link.text}</a>
+                      </li>
+                    `
+                    )
+                    .join("")}
+                </ul>`
+              : ""
+          }
 
-          let linkElement = document.createElement("a");
-          linkElement.innerText = link.text;
-          linkElement.href = "#";
-          linkElement.className = "node__link-button";
-          linkElement.dataset.nodeId = link.nodeId;
-          linkElement.addEventListener("click", event =>
-            handleNodeLinkClick(event, visitedNodes)
-          );
+          ${
+            hasPreviousNode
+              ? `<a href="#" class="node__back-button">Back</a>`
+              : ""
+          }
+        </div>
+      `;
 
-          listItemElement.appendChild(linkElement);
-          listElement.appendChild(listItemElement);
-        });
-
-        collapsibleWrapperElement.appendChild(listElement);
-      }
-
-      if (hasPreviousNode) {
-        let textElement = document.createElement("p");
-
-        let linkElement = document.createElement("a");
-        linkElement.innerText = "Back";
-        linkElement.href = "#";
-        linkElement.className = "node__back-button";
-        linkElement.addEventListener("click", () =>
-          handleBackLinkClick(visitedNodes)
-        );
-
-        textElement.appendChild(linkElement);
-        collapsibleWrapperElement.appendChild(textElement);
-      }
-
-      currentNodeElement.appendChild(collapsibleWrapperElement);
       containerElement.appendChild(currentNodeElement);
     }
 
-    function removeNodeFromView(removedNode, visitedNodes) {
+    /**
+     * Remove the element for the given node from from the view
+     *
+     * @param {FlowchartNode} removedNode
+     */
+    function removeNodeFromView(removedNode) {
       console.log("removeNodeFromView", { removedNode, visitedNodes });
       containerElement.removeChild(
         containerElement.querySelector(`[data-id="${removedNode.id}"]`)
@@ -104,6 +146,9 @@ Promise.all([fetch("flowchart.json").then(res => res.json()), domReady()]).then(
       uncollapsePreviousNode();
     }
 
+    /**
+     * Collapse the previous node element by removing the node--current class
+     */
     function collapsePreviousNode() {
       console.log("collapsePreviousNode");
       let currentElement = containerElement.querySelector(".node--current");
@@ -112,34 +157,42 @@ Promise.all([fetch("flowchart.json").then(res => res.json()), domReady()]).then(
       }
     }
 
+    /**
+     * Uncollapse the previous node element by adding the node--curent class
+     */
     function uncollapsePreviousNode() {
       console.log("uncollapsePreviousNode");
       let nodeElements = containerElement.querySelectorAll(".node");
       nodeElements[nodeElements.length - 1].classList.add("node--current");
     }
 
-    function handleNodeLinkClick(event, visitedNodes) {
-      console.log("handleNodeLinkClick", { event, visitedNodes });
-      event.preventDefault();
-      let newVisitedNodes = moveToNewNode(
-        event.target.dataset.nodeId,
-        visitedNodes
-      );
-      addNodeToView(newVisitedNodes);
+    /**
+     * Handle clicking a node link
+     * Update visitedNodes then add the new node element to the view
+     *
+     * @param {string} nodeId
+     */
+    function handleNodeLinkClick(nodeId) {
+      console.log("handleNodeLinkClick", { nodeId });
+      moveToNewNode(nodeId);
+      addNodeToView();
     }
 
-    function handleBackLinkClick(visitedNodes) {
-      console.log("handleBackLinkClick", { visitedNodes });
-      event.preventDefault();
-      let newVisitedNodes = moveToPreviousNode(visitedNodes);
-      removeNodeFromView(
-        visitedNodes[visitedNodes.length - 1],
-        newVisitedNodes
-      );
+    /**
+     * Handle clicking the back button
+     * Remove the current node element from the view then update visitedNodes
+     */
+    function handleBackLinkClick() {
+      console.log("handleBackLinkClick");
+      removeNodeFromView(visitedNodes[visitedNodes.length - 1]);
+      moveToPreviousNode();
     }
   }
 );
 
+/**
+ * Simple Promise wrapper around the DOMContentLoaded event
+ */
 function domReady() {
   return new Promise(resolve => {
     if (document.readyState === "complete") return resolve();

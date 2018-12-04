@@ -16,15 +16,8 @@ body {
   font-size: 1.6rem;
 }
 
-p {
-  margin: 1rem 0 0;
-}
-p:first-child {
-  margin: 0 0 1rem;
-}
-
-ul.container,
-ul.node__links {
+.container,
+.node__links {
   list-style-type: none;
   margin: 0;
   padding: 0;
@@ -55,7 +48,19 @@ ul.node__links {
   overflow: hidden;
   transition: max-height 0.3s;
 }
-
 .node:not(.node--current) .node__collapsible {
   max-height: 0;
+}
+
+.node__links {
+  margin-top: 1rem;
+}
+
+.node__extra-text,
+.node__back-button {
+  margin-top: 1rem;
+}
+
+.node__back-button {
+  display: inline-block;
 }
