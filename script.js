@@ -43,7 +43,7 @@ Promise.all([fetch("flowchart.json").then(res => res.json()), domReady()]).then(
       if (hasPreviousNode) {
         let previousNode = visitedNodes[currentNodeIndex - 1];
         let linkToCurrentNode = previousNode.links.find(
-          link => link.link === currentNode.id
+          link => link.nodeId === currentNode.id
         );
         if (linkToCurrentNode && linkToCurrentNode.linkExtraText) {
           let textElement = document.createElement("p");
@@ -65,7 +65,7 @@ Promise.all([fetch("flowchart.json").then(res => res.json()), domReady()]).then(
           linkElement.innerText = link.text;
           linkElement.href = "#";
           linkElement.className = "node__link-button";
-          linkElement.dataset.nodeId = link.link;
+          linkElement.dataset.nodeId = link.nodeId;
           linkElement.addEventListener("click", event =>
             handleNodeLinkClick(event, visitedNodes)
           );
