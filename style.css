@@ -1,3 +1,15 @@
+:root {
+  --text-color: #3a3a3a;
+  --node-bg-color: #cff3ff;
+  --node-border-color: #bcdae4;
+
+  --button-text-color: var(--text-color);
+  --button-bg-color: white;
+  --button-border-color: #d6d6d6;
+
+  --border-radius: 0.5rem;
+}
+
 html {
   box-sizing: border-box;
   font-size: 10px;
@@ -14,6 +26,7 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
     Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   font-size: 1.6rem;
+  color: var(--text-color);
 }
 
 .container,
@@ -23,28 +36,45 @@ body {
   padding: 0;
 }
 
+.button {
+  display: inline-block;
+  color: var(--button-text-color);
+  text-decoration: none;
+  border: 0.2rem solid var(--button-border-color);
+  border-radius: var(--border-radius);
+  background: var(--button-bg-color);
+  padding: 1rem 1.25rem;
+  transition: all 0.3s;
+}
+.button:hover,
+.button:focus {
+  --button-border-color: #5a5a5a;
+  --button-bg-color: #eaeaea;
+  outline: none;
+}
+
 .node {
-  border: 0.3rem solid #97c8d8;
+  border: 0.3rem solid var(--node-border-color);
   border-bottom-width: 0;
   padding: 1rem;
-  background: #e1f8ff;
+  background: var(--node-bg-color);
 }
 .node:first-child {
-  border-top-left-radius: 0.5rem;
-  border-top-right-radius: 0.5rem;
+  border-top-left-radius: var(--border-radius);
+  border-top-right-radius: var(--border-radius);
 }
 .node:last-child {
   border-bottom-width: 0.3rem;
-  border-bottom-left-radius: 0.5rem;
-  border-bottom-right-radius: 0.5rem;
+  border-bottom-left-radius: var(--border-radius);
+  border-bottom-right-radius: var(--border-radius);
 }
 
 .node--current {
-  background: #bcefff;
+  --node-bg-color: #e8f8fd;
 }
 
 .node__collapsible {
-  max-height: 300px;
+  max-height: 50rem;
   overflow: hidden;
   transition: max-height 0.3s;
 }
@@ -56,11 +86,17 @@ body {
   margin-top: 1rem;
 }
 
-.node__extra-text,
-.node__back-button {
+.node__link {
+  margin-bottom: 0.5rem;
+}
+.node__link:last-child {
+  margin-bottom: 0;
+}
+
+.node__extra-text {
   margin-top: 1rem;
 }
 
 .node__back-button {
-  display: inline-block;
+  margin-top: 3rem;
 }

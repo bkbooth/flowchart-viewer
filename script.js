@@ -111,9 +111,9 @@ Promise.all([fetch("flowchart.json").then(res => res.json()), domReady()]).then(
                       <li class="node__link">
                         <a
                           href="#"
-                          class="node__link-button"
+                          class="node__link-button button"
                           data-node-id="${link.nodeId}"
-                        >${link.text}</a>
+                        >⇨ ${link.text}</a>
                       </li>
                     `
                     )
@@ -124,7 +124,7 @@ Promise.all([fetch("flowchart.json").then(res => res.json()), domReady()]).then(
 
           ${
             hasPreviousNode
-              ? `<a href="#" class="node__back-button">Back</a>`
+              ? `<a href="#" class="node__back-button button">⇦ Back</a>`
               : ""
           }
         </div>
