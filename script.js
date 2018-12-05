@@ -6,6 +6,7 @@
  * @typedef {Object} FlowchartNode
  * @property {string} id
  * @property {string} text
+ * @property {string} linkedFromIndex
  * @property {?FlowchartNodeLink[]} links
  */
 
@@ -34,7 +35,10 @@ Promise.all([fetch("flowchart.json").then(res => res.json()), domReady()]).then(
     document.addEventListener("click", event => {
       if (event.target.classList.contains("node__link-button")) {
         event.preventDefault();
-        handleNodeLinkClick(event.target.dataset.nodeId);
+        handleNodeLinkClick(
+          event.target.dataset.nodeId,
+          parseInt(event.target.dataset.linkIndex)
+        );
       } else if (event.target.classList.contains("node__back-button")) {
         event.preventDefault();
         handleBackLinkClick();
@@ -49,10 +53,12 @@ Promise.all([fetch("flowchart.json").then(res => res.json()), domReady()]).then(
      * Update visitedNodes with the node object for the provided nodeId
      *
      * @param {string} nodeId
+     * @param {number} linkedFromIndex
      */
-    function moveToNewNode(nodeId) {
+    function moveToNewNode(nodeId, linkedFromIndex) {
       let node = flowchart[nodeId];
       node.id = nodeId;
+      node.linkedFromIndex = linkedFromIndex;
       visitedNodes = [...visitedNodes, node];
     }
 
@@ -80,9 +86,7 @@ Promise.all([fetch("flowchart.json").then(res => res.json()), domReady()]).then(
       let linkToCurrentNode;
       if (hasPreviousNode) {
         let previousNode = visitedNodes[currentNodeIndex - 1];
-        linkToCurrentNode = previousNode.links.find(
-          link => link.nodeId === currentNode.id
-        );
+        linkToCurrentNode = previousNode.links[currentNode.linkedFromIndex];
         addSelectedLinkToPreviousNode(previousNode, linkToCurrentNode);
       }
 
@@ -102,12 +106,13 @@ Promise.all([fetch("flowchart.json").then(res => res.json()), domReady()]).then(
               ? `<ul class="node__links">
                   ${currentNode.links
                     .map(
-                      link => `
+                      (link, index) => `
                       <li class="node__link">
                         <a
                           href="#"
                           class="node__link-button button"
                           data-node-id="${link.nodeId}"
+                          data-link-index="${index}"
                         >⇨ ${link.text}</a>
                       </li>
                     `
@@ -206,9 +211,10 @@ Promise.all([fetch("flowchart.json").then(res => res.json()), domReady()]).then(
      * Update visitedNodes then add the new node element to the view
      *
      * @param {string} nodeId
+     * @param {number} linkIndex
      */
-    function handleNodeLinkClick(nodeId) {
-      moveToNewNode(nodeId);
+    function handleNodeLinkClick(nodeId, linkIndex) {
+      moveToNewNode(nodeId, linkIndex);
       addNodeToView();
     }
 
