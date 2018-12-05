@@ -89,6 +89,7 @@ Promise.all([fetch("flowchart.json").then(res => res.json()), domReady()]).then(
         linkToCurrentNode = previousNode.links.find(
           link => link.nodeId === currentNode.id
         );
+        addSelectedLinkToPreviousNode(previousNode, linkToCurrentNode);
       }
 
       currentNodeElement.innerHTML = `
@@ -143,6 +144,7 @@ Promise.all([fetch("flowchart.json").then(res => res.json()), domReady()]).then(
       containerElement.removeChild(
         containerElement.querySelector(`[data-id="${removedNode.id}"]`)
       );
+      removeSelectedTextFromPreviousNode();
       uncollapsePreviousNode();
     }
 
@@ -164,6 +166,41 @@ Promise.all([fetch("flowchart.json").then(res => res.json()), domReady()]).then(
       console.log("uncollapsePreviousNode");
       let nodeElements = containerElement.querySelectorAll(".node");
       nodeElements[nodeElements.length - 1].classList.add("node--current");
+    }
+
+    /**
+     * Add the text of the selected link to the previous node
+     *
+     * @param {FlowchartNode} previousNode
+     * @param {FlowchartNodeLink} linkToCurrentNode
+     */
+    function addSelectedLinkToPreviousNode(previousNode, linkToCurrentNode) {
+      let selectedLinkTextElement = document.createElement("div");
+      selectedLinkTextElement.className = "node__selected-link-text";
+      selectedLinkTextElement.innerText = `⇨ ${linkToCurrentNode.text}`;
+
+      let previousNodeElement = containerElement.querySelector(
+        `[data-id="${previousNode.id}"]`
+      );
+      let previousNodeTextElement = previousNodeElement.querySelector(
+        `.node__text`
+      );
+      previousNodeElement.insertBefore(
+        selectedLinkTextElement,
+        previousNodeTextElement.nextSibling
+      );
+    }
+
+    /**
+     * Remove the text of the selected link from the previous node
+     */
+    function removeSelectedTextFromPreviousNode() {
+      let nodeElements = containerElement.querySelectorAll(".node");
+      let previousNodeElement = nodeElements[nodeElements.length - 1];
+      let selectedTextElement = previousNodeElement.querySelector(
+        ".node__selected-link-text"
+      );
+      previousNodeElement.removeChild(selectedTextElement);
     }
 
     /**

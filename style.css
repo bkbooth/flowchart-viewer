@@ -1,5 +1,6 @@
 :root {
   --text-color: #3a3a3a;
+  --text-muted-color: #638894;
   --node-bg-color: #cff3ff;
   --node-border-color: #bcdae4;
 
@@ -56,7 +57,7 @@ body {
 .node {
   border: 0.3rem solid var(--node-border-color);
   border-bottom-width: 0;
-  padding: 1rem;
+  padding: 1.5rem;
   background: var(--node-bg-color);
 }
 .node:first-child {
@@ -91,6 +92,11 @@ body {
 }
 .node__link:last-child {
   margin-bottom: 0;
+}
+
+.node__selected-link-text {
+  color: var(--text-muted-color);
+  margin-top: 0.5rem;
 }
 
 .node__extra-text {
