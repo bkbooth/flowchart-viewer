@@ -18,11 +18,8 @@
  * @property {?string} linkExtraText
  */
 
-console.log("Loading...");
 Promise.all([fetch("flowchart.json").then(res => res.json()), domReady()]).then(
   ([flowchart]) => {
-    console.log("Loaded data", flowchart);
-
     /**
      * @type {HTMLElement}
      */
@@ -54,7 +51,6 @@ Promise.all([fetch("flowchart.json").then(res => res.json()), domReady()]).then(
      * @param {string} nodeId
      */
     function moveToNewNode(nodeId) {
-      console.log("moveToNewNode", { nodeId });
       let node = flowchart[nodeId];
       node.id = nodeId;
       visitedNodes = [...visitedNodes, node];
@@ -64,7 +60,6 @@ Promise.all([fetch("flowchart.json").then(res => res.json()), domReady()]).then(
      * Remove the last (most recent) node from visitedNodes
      */
     function moveToPreviousNode() {
-      console.log("moveToPreviousNode");
       visitedNodes = visitedNodes.slice(0, -1);
     }
 
@@ -72,7 +67,6 @@ Promise.all([fetch("flowchart.json").then(res => res.json()), domReady()]).then(
      * Build and add a new node element into the view
      */
     function addNodeToView() {
-      console.log("addNodeToView", { visitedNodes });
       collapsePreviousNode();
 
       let currentNodeIndex = visitedNodes.length - 1;
@@ -141,7 +135,6 @@ Promise.all([fetch("flowchart.json").then(res => res.json()), domReady()]).then(
      * @param {FlowchartNode} removedNode
      */
     function removeNodeFromView(removedNode) {
-      console.log("removeNodeFromView", { removedNode, visitedNodes });
       let removedNodeElement = containerElement.querySelector(
         `[data-id="${removedNode.id}"]`
       );
@@ -159,7 +152,6 @@ Promise.all([fetch("flowchart.json").then(res => res.json()), domReady()]).then(
      * Collapse the previous node element by removing the node--current class
      */
     function collapsePreviousNode() {
-      console.log("collapsePreviousNode");
       let currentElement = containerElement.querySelector(".node--current");
       if (currentElement) {
         currentElement.classList.remove("node--current");
@@ -170,7 +162,6 @@ Promise.all([fetch("flowchart.json").then(res => res.json()), domReady()]).then(
      * Uncollapse the previous node element by adding the node--curent class
      */
     function uncollapsePreviousNode() {
-      console.log("uncollapsePreviousNode");
       let nodeElements = containerElement.querySelectorAll(".node");
       nodeElements[nodeElements.length - 2].classList.add("node--current");
     }
@@ -217,7 +208,6 @@ Promise.all([fetch("flowchart.json").then(res => res.json()), domReady()]).then(
      * @param {string} nodeId
      */
     function handleNodeLinkClick(nodeId) {
-      console.log("handleNodeLinkClick", { nodeId });
       moveToNewNode(nodeId);
       addNodeToView();
     }
@@ -227,7 +217,6 @@ Promise.all([fetch("flowchart.json").then(res => res.json()), domReady()]).then(
      * Remove the current node element from the view then update visitedNodes
      */
     function handleBackLinkClick() {
-      console.log("handleBackLinkClick");
       removeNodeFromView(visitedNodes[visitedNodes.length - 1]);
       moveToPreviousNode();
     }
