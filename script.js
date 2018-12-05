@@ -78,7 +78,7 @@ Promise.all([fetch("flowchart.json").then(res => res.json()), domReady()]).then(
       let currentNodeIndex = visitedNodes.length - 1;
       let currentNode = visitedNodes[currentNodeIndex];
       let currentNodeElement = document.createElement("li");
-      currentNodeElement.className = "node node--current";
+      currentNodeElement.className = "node node--current show-start";
       currentNodeElement.dataset.id = currentNode.id;
       currentNodeElement.dataset.index = currentNodeIndex;
 
@@ -132,6 +132,7 @@ Promise.all([fetch("flowchart.json").then(res => res.json()), domReady()]).then(
       `;
 
       containerElement.appendChild(currentNodeElement);
+      setTimeout(() => currentNodeElement.classList.remove("show-start"), 100);
     }
 
     /**
@@ -141,9 +142,15 @@ Promise.all([fetch("flowchart.json").then(res => res.json()), domReady()]).then(
      */
     function removeNodeFromView(removedNode) {
       console.log("removeNodeFromView", { removedNode, visitedNodes });
-      containerElement.removeChild(
-        containerElement.querySelector(`[data-id="${removedNode.id}"]`)
+      let removedNodeElement = containerElement.querySelector(
+        `[data-id="${removedNode.id}"]`
       );
+      removedNodeElement.addEventListener("transitionend", event => {
+        if (event.propertyName === "max-height") {
+          containerElement.removeChild(removedNodeElement);
+        }
+      });
+      removedNodeElement.classList.add("hide-start");
       removeSelectedTextFromPreviousNode();
       uncollapsePreviousNode();
     }
@@ -165,7 +172,7 @@ Promise.all([fetch("flowchart.json").then(res => res.json()), domReady()]).then(
     function uncollapsePreviousNode() {
       console.log("uncollapsePreviousNode");
       let nodeElements = containerElement.querySelectorAll(".node");
-      nodeElements[nodeElements.length - 1].classList.add("node--current");
+      nodeElements[nodeElements.length - 2].classList.add("node--current");
     }
 
     /**
@@ -196,7 +203,7 @@ Promise.all([fetch("flowchart.json").then(res => res.json()), domReady()]).then(
      */
     function removeSelectedTextFromPreviousNode() {
       let nodeElements = containerElement.querySelectorAll(".node");
-      let previousNodeElement = nodeElements[nodeElements.length - 1];
+      let previousNodeElement = nodeElements[nodeElements.length - 2];
       let selectedTextElement = previousNodeElement.querySelector(
         ".node__selected-link-text"
       );

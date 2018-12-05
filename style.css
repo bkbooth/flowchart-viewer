@@ -9,6 +9,8 @@
   --button-border-color: #d6d6d6;
 
   --border-radius: 0.5rem;
+  --transition-time: 0.4s;
+  --transition-slide-timing: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 html {
@@ -45,7 +47,7 @@ body {
   border-radius: var(--border-radius);
   background: var(--button-bg-color);
   padding: 1rem 1.25rem;
-  transition: all 0.3s;
+  transition: all var(--transition-time);
 }
 .button:hover,
 .button:focus {
@@ -59,6 +61,9 @@ body {
   border-bottom-width: 0;
   padding: 1.5rem;
   background: var(--node-bg-color);
+  max-height: 40rem;
+  overflow: hidden;
+  transition: all var(--transition-time) var(--transition-slide-timing);
 }
 .node:first-child {
   border-top-left-radius: var(--border-radius);
@@ -74,10 +79,17 @@ body {
   --node-bg-color: #e8f8fd;
 }
 
+.node.show-start,
+.node.hide-start {
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
 .node__collapsible {
-  max-height: 50rem;
+  max-height: 40rem;
   overflow: hidden;
-  transition: max-height 0.3s;
+  transition: max-height var(--transition-time) var(--transition-slide-timing);
 }
 .node:not(.node--current) .node__collapsible {
   max-height: 0;
